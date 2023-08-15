@@ -12,22 +12,31 @@ import (
 )
 
 type Route struct {
-	url      string
-	methods  []string
-	function func(http.ResponseWriter, *http.Request)
+	url          string
+	methods      []string
+	function     func(http.ResponseWriter, *http.Request)
+	authRequired bool
 }
 
 var Routes = []Route{
-	{"/locations", []string{"GET"}, locations},
-	{"/locations", []string{"POST"}, createLocation},
-	{"/locations/{id}", []string{"PUT"}, updateLocation},
-	{"/token", []string{"POST"}, getTokens},
-	{"/token/refresh", []string{"POST"}, refreshToken},
+	{url: "/locations", methods: []string{"GET"}, function: locations, authRequired: true},
+	{url: "/locations", methods: []string{"POST"}, function: createLocation, authRequired: true},
+	{url: "/locations/{id}", methods: []string{"PUT"}, function: updateLocation, authRequired: true},
+
+	{url: "/token", methods: []string{"POST"}, function: getTokens},
+	{url: "/token/refresh", methods: []string{"POST"}, function: refreshToken},
 }
 
 func RegisterRoutes(r *mux.Router) {
+	authRouter := r.PathPrefix("/").Subrouter()
+	authRouter.Use(authRequiredMiddleware)
+
 	for _, route := range Routes {
-		r.HandleFunc(route.url, route.function).Methods(route.methods...)
+		if route.authRequired {
+			authRouter.HandleFunc(route.url, route.function).Methods(route.methods...)
+		} else {
+			r.HandleFunc(route.url, route.function).Methods(route.methods...)
+		}
 	}
 }
 
@@ -69,10 +78,10 @@ func jsonResponse(w http.ResponseWriter, code int, data any) {
 func jsonError(w http.ResponseWriter, err any) {
 	switch err := err.(type) {
 	case error:
-		jsonResponse(w, 400, map[string]any{"message": "An Error Occured", "error": parseError(err)})
+		jsonResponse(w, 400, map[string]any{"message": ErrorMessage, "error": parseError(err)})
 		return
 	}
-	jsonResponse(w, 400, map[string]any{"message": "An Error Occured", "error": err})
+	jsonResponse(w, 400, map[string]any{"message": ErrorMessage, "error": err})
 }
 
 func jsonDecode(r *http.Request, data any) error {

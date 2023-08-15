@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/tofu345/Building-mgmt-backend/internal"
@@ -31,7 +30,8 @@ func main() {
 
 	port := "127.0.0.1:8000"
 	r := mux.NewRouter()
-	r.Use(loggingMiddleware)
+	r.Use(internal.LoggingMiddleware)
+	r.Use(allowCorsMiddleware)
 
 	internal.RegisterRoutes(r)
 
@@ -46,6 +46,11 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
-	return handlers.LoggingHandler(os.Stdout, next)
+func allowCorsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for _, v := range internal.ALLOWED_HOSTS {
+			w.Header().Set("Access-Control-Allow-Origin", v)
+		}
+		next.ServeHTTP(w, r)
+	})
 }

@@ -10,6 +10,8 @@ import (
 )
 
 func locations(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println(r.Context().Value("user"))
+
 	objs := []Location{}
 	err := db.Find(&objs).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -159,7 +161,14 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	email := payload["email"]
 	switch email := email.(type) {
 	case string:
-		access, err := newAccessToken(User{Email: email})
+		var user User
+		err = db.First(&user, "email = ?", email).Error
+		if err != nil {
+			jsonError(w, err)
+			return
+		}
+
+		access, err := newAccessToken(user)
 		if err != nil {
 			jsonError(w, err)
 			return
