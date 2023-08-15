@@ -12,10 +12,10 @@ type Model interface {
 
 func validate(obj Model) (map[string]any, bool) {
 	var structMap map[string]any
-	errorsMap := map[string]any{}
 	data, _ := json.Marshal(obj)
 	json.Unmarshal(data, &structMap)
 
+	errorsMap := map[string]any{}
 	for _, field := range obj.requiredFields() {
 		v, ok := structMap[field]
 		if !ok {
@@ -42,6 +42,8 @@ func validateField(field any) bool {
 	switch field := field.(type) {
 	case string:
 		return field != ""
+	case int, uint, float64:
+		return field == 0
 	}
 
 	panic(fmt.Sprintf("type %t does not have any validator set", field))

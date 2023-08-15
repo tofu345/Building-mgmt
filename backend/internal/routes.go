@@ -23,7 +23,14 @@ var Routes = []Route{
 	{url: "/locations", methods: []string{"POST"}, function: createLocation, authRequired: true},
 	{url: "/locations/{id}", methods: []string{"PUT"}, function: updateLocation, authRequired: true},
 
-	{url: "/token", methods: []string{"POST"}, function: getTokens},
+	{url: "/locations/{id}/rooms", methods: []string{"GET"}, function: locationRooms, authRequired: true},
+	{url: "/locations/{id}/rooms", methods: []string{"POST"}, function: createRoom, authRequired: true},
+
+	{url: "/rooms/{id}", methods: []string{"PUT"}, function: updateRoom, authRequired: true},
+	{url: "/rooms/{id}", methods: []string{"GET"}, function: getRoom, authRequired: true},
+
+	{url: "/users", methods: []string{"GET"}, function: userList, authRequired: true},
+	{url: "/token", methods: []string{"POST"}, function: getTokenPair},
 	{url: "/token/refresh", methods: []string{"POST"}, function: refreshToken},
 }
 

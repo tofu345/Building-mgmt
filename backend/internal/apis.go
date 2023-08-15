@@ -9,6 +9,122 @@ import (
 	"gorm.io/gorm"
 )
 
+func locationRooms(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	location := Location{ID: uint(id)}
+	err = db.Model(&Location{}).Preload("Rooms").First(&location).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	jsonResponse(w, 200, location.Rooms)
+}
+
+func createRoom(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	var room Room
+	err = jsonDecode(r, &room)
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	errorMap, valid := validate(&room)
+	if !valid {
+		jsonError(w, errorMap)
+		return
+	}
+
+	err = db.Save(&room).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	location := Location{ID: uint(id)}
+	err = db.First(&location).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	location.Rooms = append(location.Rooms, room)
+	err = db.Save(&location).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	jsonResponse(w, 200, room)
+}
+
+func updateRoom(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	room := Room{ID: uint(id)}
+	err = db.First(&room).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	err = jsonDecode(r, &room)
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	errorMap, valid := validate(&room)
+	if !valid {
+		jsonError(w, errorMap)
+		return
+	}
+
+	err = db.Save(&room).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	jsonResponse(w, 200, room)
+}
+
+func getRoom(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	room := Room{ID: uint(id)}
+	err = db.First(&room).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	jsonResponse(w, 200, room)
+}
+
 func locations(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(r.Context().Value("user"))
 
@@ -81,7 +197,7 @@ func updateLocation(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, 200, location)
 }
 
-func getTokens(w http.ResponseWriter, r *http.Request) {
+func getTokenPair(w http.ResponseWriter, r *http.Request) {
 	postData := map[string]string{}
 	err := jsonDecode(r, &postData)
 	if err != nil {
@@ -178,4 +294,15 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	default:
 		jsonError(w, InvalidToken)
 	}
+}
+
+func userList(w http.ResponseWriter, r *http.Request) {
+	users := []User{}
+	err := db.Find(&users).Error
+	if err != nil {
+		jsonError(w, err)
+		return
+	}
+
+	jsonResponse(w, 200, users)
 }
