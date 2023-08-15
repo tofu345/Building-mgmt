@@ -25,26 +25,8 @@ func (user *User) Name() string {
 	return user.FirstName + " " + user.LastName
 }
 
-func (user *User) validate() (map[string]string, bool) {
-	errors := map[string]string{}
-
-	if user.Email == "" {
-		errors["email"] = RequiredField
-	}
-
-	if user.FirstName == "" {
-		errors["first_name"] = RequiredField
-	}
-
-	if user.LastName == "" {
-		errors["last_name"] = RequiredField
-	}
-
-	if user.Password == "" {
-		errors["password"] = RequiredField
-	}
-
-	return errors, len(errors) == 0
+func (u *User) requiredFields() []string {
+	return []string{"email", "first_name", "last_name"}
 }
 
 type Location struct {
@@ -55,18 +37,8 @@ type Location struct {
 	Rooms   []Room `json:"rooms" gorm:"foreignKey:ID"`
 }
 
-func (location *Location) validate() (map[string]string, bool) {
-	errors := map[string]string{}
-
-	if location.Name == "" {
-		errors["name"] = RequiredField
-	}
-
-	if location.Address == "" {
-		errors["address"] = RequiredField
-	}
-
-	return errors, len(errors) == 0
+func (l *Location) requiredFields() []string {
+	return []string{"name", "address"}
 }
 
 type Room struct {
@@ -75,4 +47,8 @@ type Room struct {
 	OwnerID        uint      `json:"owner"`
 	TenantID       uint      `json:"tenant"`
 	TenancyEndDate time.Time `json:"tenancy_end_date"`
+}
+
+func (r *Room) requiredFields() []string {
+	return []string{"name"}
 }

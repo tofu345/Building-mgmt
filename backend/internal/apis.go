@@ -30,7 +30,7 @@ func createLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, valid := location.validate()
+	data, valid := validate(&location)
 	if !valid {
 		jsonError(w, data)
 		return
@@ -66,7 +66,7 @@ func updateLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, valid := location.validate()
+	data, valid := validate(&location)
 	if !valid {
 		jsonError(w, data)
 		return
@@ -108,14 +108,14 @@ func getTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errorMap, valid := user.validate()
+	errorMap, valid := validate(&user)
 	if !valid {
 		jsonError(w, errorMap)
 		return
 	}
 
 	if !CheckPasswordHash(postData["password"], user.Password) {
-		jsonError(w, "InvalidLogin")
+		jsonError(w, InvalidLogin)
 		return
 	}
 
