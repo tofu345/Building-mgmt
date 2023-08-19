@@ -1,4 +1,4 @@
-package internal
+package models
 
 import (
 	"fmt"
@@ -11,6 +11,12 @@ import (
 )
 
 var db *gorm.DB
+
+var models = []any{
+	User{},
+	Location{},
+	Room{},
+}
 
 func init() {
 	err := godotenv.Load(".env")

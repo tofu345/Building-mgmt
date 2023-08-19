@@ -7,7 +7,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/tofu345/Building-mgmt-backend/internal"
+	m "github.com/tofu345/Building-mgmt-backend/src/models"
+	s "github.com/tofu345/Building-mgmt-backend/src/services"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +27,7 @@ var (
 )
 
 func init() {
-	db = internal.GetDB()
+	db = m.GetDB()
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -34,7 +35,17 @@ func init() {
 	}
 }
 
-func Shell() {
+func Shell(args ...string) {
+	if len(args) > 0 {
+		script, err := getScript(args[0])
+		if err != nil {
+			fatal(err)
+		}
+
+		script.function()
+		return
+	}
+
 	fmt.Println("? 'help' to view list of commands")
 
 	for {
@@ -52,8 +63,8 @@ func Shell() {
 				return
 			}
 
-			for _, v := range scripts {
-				fmt.Printf("%v\t%v\n", v.name, v.description)
+			for _, script := range scripts {
+				fmt.Printf("%v\t%v\n", script.name, script.description)
 			}
 		case "ex", "exit":
 			return
@@ -70,8 +81,8 @@ func Shell() {
 }
 
 func createAdmin() {
-	admins := []internal.User{}
-	err := db.Where("is_superuser <> ?", true).Find(&admins).Error
+	admins := []m.User{}
+	err := db.Where("is_superuser = ?", true).Find(&admins).Error
 	if err != nil {
 		fatal(err)
 	}
@@ -88,9 +99,9 @@ func createAdmin() {
 	first_name := getUserInput("> First Name: ")
 	last_name := getUserInput("> Last Name: ")
 	email := getUserInput("> Email: ")
-	password := getPassword()
+	password := getAndComparePasswords()
 
-	user := internal.User{
+	user := m.User{
 		FirstName:   first_name,
 		LastName:    last_name,
 		Password:    password,
@@ -98,10 +109,29 @@ func createAdmin() {
 		IsSuperuser: true,
 	}
 
+	errs := s.ValidateModel(user)
+	if errs != nil {
+		formatValidationErrors(errs)
+		_, ok := errs["Password"]
+		if len(errs) == 1 && ok {
+			proceed := getUserInput("> Save anyway? (y/n): ")
+			if proceed != "y" {
+				return
+			}
+		} else {
+			return
+		}
+
+	}
+
+	user.Password, err = s.HashPassword(user.Password)
+	if err != nil {
+		fatal(err)
+	}
+
 	err = db.Create(&user).Error
 	if err != nil {
 		fatal(err)
-		return
 	}
 
 	fmt.Println("! Admin Created Successfully")

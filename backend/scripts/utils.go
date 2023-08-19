@@ -1,13 +1,16 @@
 package scripts
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"syscall"
 
-	"github.com/tofu345/Building-mgmt-backend/internal"
+	m "github.com/tofu345/Building-mgmt-backend/src/models"
+	s "github.com/tofu345/Building-mgmt-backend/src/services"
 	"golang.org/x/term"
+	"gorm.io/gorm"
 )
 
 func getScript(name string) (Script, error) {
@@ -30,24 +33,23 @@ func getUserInput(prompt string) string {
 	return strings.TrimSpace(text)
 }
 
-func adminLogin() (internal.User, error) {
+func adminLogin() (m.User, error) {
 	fmt.Println("! Admin Login Required")
 
 	email := getUserInput("> Admin Email: ")
-	admin := internal.User{}
-	err := db.Where("email = ?", email).Find(&admin).Error
+	admin, err := s.GetUserByEmail(email)
 	if err != nil {
-		return internal.User{}, err
-	}
-
-	if admin.ID == 0 {
-		fmt.Printf("! No user found with email '%v'\n", email)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Printf("! No user found with email '%v'\n", email)
+		} else {
+			fatal(err)
+		}
 		return adminLogin()
 	}
 
 	fmt.Print("> Admin Password: ")
 	password := readPassword()
-	if !internal.CheckPasswordHash(password, admin.Password) {
+	if !s.CheckPasswordHash(password, admin.Password) {
 		fmt.Println("! Incorrect password")
 		return adminLogin()
 	}
@@ -64,7 +66,7 @@ func adminLogin() (internal.User, error) {
 //
 // It takes an error as a parameter and does not return anything.
 func fatal(err error) {
-	fmt.Printf("! %v\n", err)
+	fmt.Printf("! %v\n", s.ParseError(err))
 	os.Exit(0)
 }
 
@@ -77,14 +79,7 @@ func readPassword() string {
 	return string(bytePassword)
 }
 
-// getPassword returns the user's password after validating it.
-//
-// It prompts the user to enter a password and retype it for confirmation.
-// If the passwords do not match, an error message is displayed and the function is called recursively.
-// The entered password is then hashed using the internal.HashPassword function.
-// If an error occurs during the hashing process, the function calls the fatal function with the error.
-// Finally, the hashed password is returned.
-func getPassword() string {
+func getAndComparePasswords() string {
 	fmt.Print("> Password: ")
 	password := readPassword()
 
@@ -93,13 +88,14 @@ func getPassword() string {
 
 	if password != password2 {
 		fmt.Println("! Passwords do not match")
-		return getPassword()
-	}
-
-	password, err := internal.HashPassword(password)
-	if err != nil {
-		fatal(err)
+		return getAndComparePasswords()
 	}
 
 	return password
+}
+
+func formatValidationErrors(errs map[string]string) {
+	for k, v := range errs {
+		fmt.Printf("! %v\t%v\n", k, v)
+	}
 }
