@@ -24,7 +24,7 @@ func JwtAuth(token string) (m.User, error) {
 	email := payload["email"]
 	switch email := email.(type) {
 	case string:
-		user, err := GetUserByEmail(email)
+		user, err := m.GetUserByEmail(email)
 		if err != nil {
 			return m.User{}, err
 		}

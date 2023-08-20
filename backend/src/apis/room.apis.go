@@ -19,7 +19,7 @@ func GetRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room, err := s.GetRoom(id)
+	room, err := m.GetRoom(id)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -36,7 +36,7 @@ func UpdateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room, err := s.GetRoom(id)
+	room, err := m.GetRoom(id)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -54,7 +54,7 @@ func UpdateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Save(&room).Error
+	err = m.UpdateRoom(&room)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -84,7 +84,7 @@ func CreateRoomForLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loc, err := s.GetLocation(id)
+	loc, err := m.GetLocation(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			s.BadRequest(w, "Location not found")
@@ -94,14 +94,14 @@ func CreateRoomForLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Create(&room).Error
+	err = m.CreateRoom(&room)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
 	}
 
 	loc.Rooms = append(loc.Rooms, room)
-	err = db.Save(&loc).Error
+	err = m.UpdateLocation(&loc)
 	if err != nil {
 		s.BadRequest(w, err)
 		return

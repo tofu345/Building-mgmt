@@ -16,3 +16,15 @@ type User struct {
 func (user *User) Name() string {
 	return user.FirstName + " " + user.LastName
 }
+
+func GetUserByEmail(email string) (User, error) {
+	var user User
+	err := db.First(&user, "email = ?", email).Error
+	return user, err
+}
+
+func GetUserList() ([]User, error) {
+	var users []User
+	err := db.Find(&users).Error
+	return users, err
+}

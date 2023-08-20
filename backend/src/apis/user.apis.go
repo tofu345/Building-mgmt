@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	c "github.com/tofu345/Building-mgmt-backend/src/constants"
+	m "github.com/tofu345/Building-mgmt-backend/src/models"
 	s "github.com/tofu345/Building-mgmt-backend/src/services"
 )
 
@@ -14,7 +15,7 @@ func GenerateTokenPair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := s.GetUserByEmail(data["email"])
+	user, err := m.GetUserByEmail(data["email"])
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -59,7 +60,7 @@ func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
 	email := payload["email"]
 	switch email := email.(type) {
 	case string:
-		user, err := s.GetUserByEmail(email)
+		user, err := m.GetUserByEmail(email)
 		if err != nil {
 			s.BadRequest(w, err)
 			return
@@ -78,7 +79,7 @@ func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserList(w http.ResponseWriter, r *http.Request) {
-	users, err := s.GetUserList()
+	users, err := m.GetUserList()
 	if err != nil {
 		s.BadRequest(w, err)
 		return

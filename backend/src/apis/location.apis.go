@@ -10,7 +10,7 @@ import (
 )
 
 func GetLocations(w http.ResponseWriter, r *http.Request) {
-	locations, err := s.GetLocations()
+	locations, err := m.GetLocations()
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -27,7 +27,7 @@ func GetLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loc, err := s.GetLocation(id)
+	loc, err := m.GetLocation(id)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -44,7 +44,7 @@ func GetLocationRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loc, err := s.GetLocation(id)
+	loc, err := m.GetLocation(id)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -68,7 +68,7 @@ func CreateLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loc.ID = 0
-	err = db.Create(&loc).Error
+	err = m.CreateLocation(&loc)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -85,7 +85,7 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loc, err := s.GetLocation(id)
+	loc, err := m.GetLocation(id)
 	if err != nil {
 		s.BadRequest(w, err)
 		return
@@ -104,7 +104,7 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Save(&loc).Error
+	err = m.UpdateLocation(&loc)
 	if err != nil {
 		s.BadRequest(w, err)
 		return

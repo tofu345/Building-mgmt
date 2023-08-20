@@ -37,7 +37,7 @@ func adminLogin() (m.User, error) {
 	fmt.Println("! Admin Login Required")
 
 	email := getUserInput("> Admin Email: ")
-	admin, err := s.GetUserByEmail(email)
+	admin, err := m.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			fmt.Printf("! No user found with email '%v'\n", email)
