@@ -40,7 +40,7 @@ func GenerateTokenPair(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
-	data, valid := s.PostDataToMap(r, "email", "password")
+	data, valid := s.PostDataToMap(r, "token")
 	if !valid {
 		s.BadRequest(w, data)
 		return
