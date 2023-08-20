@@ -6,19 +6,19 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	c "github.com/tofu345/Building-mgmt-backend/src/constants"
+	"github.com/tofu345/Building-mgmt-backend/src"
 	m "github.com/tofu345/Building-mgmt-backend/src/models"
 )
 
 func JwtAuth(token string) (m.User, error) {
 	if token == "" {
-		return m.User{}, c.ErrInvalidToken
+		return m.User{}, src.ErrInvalidToken
 	}
 
 	token = strings.Split(token, " ")[1]
 	payload, err := DecodeToken(token)
 	if err != nil {
-		return m.User{}, c.ErrInvalidToken
+		return m.User{}, src.ErrInvalidToken
 	}
 
 	email := payload["email"]
@@ -31,14 +31,14 @@ func JwtAuth(token string) (m.User, error) {
 
 		return user, nil
 	default:
-		return m.User{}, c.ErrInvalidToken
+		return m.User{}, src.ErrInvalidToken
 	}
 }
 
 func defaultJwtClaims(user m.User) jwt.MapClaims {
 	time_now := time.Now()
 	return jwt.MapClaims{
-		"iss":   c.JWT_ISSUER,
+		"iss":   src.JWT_ISSUER,
 		"iat":   time_now.Unix(),
 		"exp":   time_now.Add(time.Hour).Unix(),
 		"email": user.Email,
@@ -46,13 +46,13 @@ func defaultJwtClaims(user m.User) jwt.MapClaims {
 }
 
 func AccessToken(user m.User) (string, error) {
-	key := []byte(c.JWT_KEY)
+	key := []byte(src.JWT_KEY)
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, defaultJwtClaims(user))
 	return t.SignedString(key)
 }
 
 func RefreshToken(user m.User) (string, error) {
-	key := []byte(c.JWT_KEY)
+	key := []byte(src.JWT_KEY)
 	claims := defaultJwtClaims(user)
 	claims["ref"] = true
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -65,7 +65,7 @@ func DecodeToken(tokenData string) (map[string]any, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(c.JWT_KEY), nil
+		return []byte(src.JWT_KEY), nil
 	})
 	if err != nil {
 		return map[string]any{}, err

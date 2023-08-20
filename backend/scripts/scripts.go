@@ -9,7 +9,6 @@ import (
 	"github.com/joho/godotenv"
 	m "github.com/tofu345/Building-mgmt-backend/src/models"
 	s "github.com/tofu345/Building-mgmt-backend/src/services"
-	"gorm.io/gorm"
 )
 
 type Script struct {
@@ -19,7 +18,6 @@ type Script struct {
 }
 
 var (
-	db      *gorm.DB
 	r       = bufio.NewReader(os.Stdin)
 	scripts = []Script{
 		{"create_admin", "Create Admin User", createAdmin},
@@ -27,8 +25,6 @@ var (
 )
 
 func init() {
-	db = m.GetDB()
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
@@ -81,8 +77,7 @@ func Shell(args ...string) {
 }
 
 func createAdmin() {
-	admins := []m.User{}
-	err := db.Where("is_superuser = ?", true).Find(&admins).Error
+	admins, err := m.GetAdmins()
 	if err != nil {
 		fatal(err)
 	}
@@ -129,7 +124,7 @@ func createAdmin() {
 		fatal(err)
 	}
 
-	err = db.Create(&user).Error
+	err = m.CreateUser(&user)
 	if err != nil {
 		fatal(err)
 	}

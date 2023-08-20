@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/go-playground/validator"
-	c "github.com/tofu345/Building-mgmt-backend/src/constants"
+	"github.com/tofu345/Building-mgmt-backend/src"
 )
 
 var v *validator.Validate
@@ -35,7 +35,7 @@ func ValidateModel(obj any) map[string]string {
 	for _, err := range err.(validator.ValidationErrors) {
 		switch err.Tag() {
 		case "required":
-			errMsg = c.RequiredField
+			errMsg = src.RequiredField
 		case "email":
 			errMsg = "Invalid email address"
 		case "pswd":

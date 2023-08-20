@@ -6,13 +6,16 @@ import (
 	s "github.com/tofu345/Building-mgmt-backend/src/services"
 )
 
-func AuthRequired(w http.ResponseWriter, r *http.Request) error {
-	token := r.Header.Get("Authorization")
-	user, err := s.JwtAuth(token)
-	if err != nil {
-		return err
-	}
+func AuthRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+		user, err := s.JwtAuth(token)
+		if err != nil {
+			s.JsonError(w, http.StatusUnauthorized, err)
+			return
+		}
 
-	s.AddDataToRequestContext(r, "user", user)
-	return nil
+		s.AddToRequestContext(r, "user", user)
+		next.ServeHTTP(w, r)
+	})
 }

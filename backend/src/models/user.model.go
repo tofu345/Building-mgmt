@@ -23,8 +23,18 @@ func GetUserByEmail(email string) (User, error) {
 	return user, err
 }
 
+func GetAdmins() ([]User, error) {
+	var users []User
+	err := db.Where("is_superuser = ?", true).Find(&users).Error
+	return users, err
+}
+
 func GetUserList() ([]User, error) {
 	var users []User
 	err := db.Find(&users).Error
 	return users, err
+}
+
+func CreateUser(user *User) error {
+	return db.Create(user).Error
 }

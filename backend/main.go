@@ -4,12 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/tofu345/Building-mgmt-backend/scripts"
 	"github.com/tofu345/Building-mgmt-backend/src/middleware"
 	"github.com/tofu345/Building-mgmt-backend/src/routes"
@@ -38,16 +37,17 @@ func main() {
 	port := "127.0.0.1:8000"
 	r := mux.NewRouter()
 	r.Use(middleware.Logging)
-	r.Use(middleware.AllowCors)
 
 	routes.RegisterRoutes(r)
 
-	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
-	originsOk := handlers.AllowedOrigins(strings.Split(os.Getenv("ALLOWED_HOSTS"), ","))
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+	})
 
 	srv := &http.Server{
-		Handler:      handlers.CORS(headersOk, originsOk, methodsOk)(r),
+		Handler:      c.Handler(r),
 		Addr:         port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

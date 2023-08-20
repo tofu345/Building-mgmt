@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 
-	"github.com/tofu345/Building-mgmt-backend/src/constants"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +18,7 @@ func GetLocations() ([]Location, error) {
 	rows := []Location{}
 	err := db.Model(&Location{}).Preload("Rooms").First(&rows).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return []Location{}, constants.ErrObjectNotFound
+		return []Location{}, err
 	}
 
 	return rows, nil

@@ -1,4 +1,4 @@
-package constants
+package src
 
 import (
 	"errors"
@@ -22,6 +22,12 @@ func init() {
 var (
 	JWT_KEY       string
 	ALLOWED_HOSTS []string
+
+	ErrInvalidToken   = errors.New(InvalidToken)
+	ErrInvalidData    = errors.New(InvalidData)
+	ErrEmptyPostData  = errors.New("Empty post data")
+	ErrObjectNotFound = errors.New("Object not found")
+	ErrUnauthorized   = errors.New("Unauthorized")
 )
 
 const (
@@ -33,12 +39,4 @@ const (
 	ErrorMessage  = "An error occured"
 	TokenError    = "Error generating token"
 	InvalidToken  = "Invalid or missing token"
-)
-
-var (
-	ErrInvalidToken   = errors.New(InvalidToken)
-	ErrInvalidData    = errors.New(InvalidData)
-	ErrEmptyPostData  = errors.New("Empty post data")
-	ErrObjectNotFound = errors.New("Object not found")
-	ErrUnauthorized   = errors.New("Unauthorized")
 )

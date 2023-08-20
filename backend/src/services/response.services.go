@@ -8,19 +8,9 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/tofu345/Building-mgmt-backend/src/constants"
+	"github.com/tofu345/Building-mgmt-backend/src"
 	"gorm.io/gorm"
 )
-
-func JsonResponse(w http.ResponseWriter, code int, data any) {
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(data)
-}
-
-func Success(w http.ResponseWriter, data any) {
-	JsonResponse(w, 200, data)
-}
 
 func ParseError(err error) string {
 	var str string
@@ -41,6 +31,21 @@ func ParseError(err error) string {
 	return str
 }
 
+func JsonResponse(w http.ResponseWriter, status int, data any) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
+}
+
+func Success(w http.ResponseWriter, data any) {
+	JsonResponse(w, http.StatusOK, data)
+}
+
+func JsonError(w http.ResponseWriter, status int, err error) {
+	data := map[string]any{"message": "An error occured", "error": ParseError(err)}
+	JsonResponse(w, status, data)
+}
+
 func BadRequest(w http.ResponseWriter, err any) {
 	data := map[string]any{"message": "An error occured"}
 
@@ -55,13 +60,13 @@ func BadRequest(w http.ResponseWriter, err any) {
 		data["detail"] = err
 	}
 
-	JsonResponse(w, 400, data)
+	JsonResponse(w, http.StatusBadRequest, data)
 }
 
 func JsonDecode(r *http.Request, data any) error {
 	err := json.NewDecoder(r.Body).Decode(data)
 	if errors.Is(err, io.EOF) {
-		return constants.ErrEmptyPostData
+		return src.ErrEmptyPostData
 	}
 	return err
 }

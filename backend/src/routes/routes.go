@@ -1,55 +1,27 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gorilla/mux"
 
-	"github.com/tofu345/Building-mgmt-backend/src/services"
+	"github.com/tofu345/Building-mgmt-backend/src/apis"
+	"github.com/tofu345/Building-mgmt-backend/src/middleware"
 )
 
-var routes = [][]Route{
-	locationRoutes,
-	userRoutes,
-	roomRoutes,
-}
-
 func RegisterRoutes(r *mux.Router) {
-	routesList := []Route{}
-	for _, others := range routes {
-		routesList = append(routesList, others...)
-	}
+	auth := r.PathPrefix("/").Subrouter()
+	auth.Use(middleware.AuthRequired)
 
-	for _, route := range routesList {
-		if route.middleware != nil && len(route.middleware) > 0 {
-			route.function = middlewareWrapper(route.function, route.middleware...)
-		}
+	r.HandleFunc("/token", apis.GenerateTokenPair).Methods("POST")
+	r.HandleFunc("/token/refresh", apis.RegenerateAccessToken).Methods("POST")
+	auth.HandleFunc("/users", apis.GetUserList).Methods("GET")
 
-		r.HandleFunc(route.url, route.function).Methods(route.methods...)
-	}
-}
+	auth.HandleFunc("/rooms/{id}", apis.GetRoom).Methods("GET")
+	auth.HandleFunc("/rooms/{id}", apis.UpdateRoom).Methods("PUT")
 
-type Route struct {
-	url        string
-	methods    []string
-	function   Handler
-	middleware []Middleware
-}
-
-type Handler func(http.ResponseWriter, *http.Request)
-
-type Middleware func(http.ResponseWriter, *http.Request) error
-
-func middlewareWrapper(handler Handler, mdws ...Middleware) Handler {
-	return func(w http.ResponseWriter, r *http.Request) {
-		for _, v := range mdws {
-			err := v(w, r)
-			if err != nil {
-				services.BadRequest(w, err)
-				return
-			}
-		}
-
-		handler(w, r)
-	}
+	auth.HandleFunc("/locations", apis.GetLocations).Methods("GET")
+	auth.HandleFunc("/locations", apis.CreateLocation).Methods("POST")
+	auth.HandleFunc("/locations/{id}", apis.GetLocation).Methods("GET")
+	auth.HandleFunc("/locations/{id}", apis.UpdateLocation).Methods("PUT")
+	auth.HandleFunc("/locations/{id}/rooms", apis.GetLocationRooms).Methods("GET")
+	auth.HandleFunc("/locations/{id}/rooms", apis.CreateRoomForLocation).Methods("POST")
 }

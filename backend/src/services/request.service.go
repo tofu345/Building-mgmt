@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	c "github.com/tofu345/Building-mgmt-backend/src/constants"
+	"github.com/tofu345/Building-mgmt-backend/src"
 )
 
-func AddDataToRequestContext(r *http.Request, key string, data any) {
+func AddToRequestContext(r *http.Request, key string, data any) {
 	newContext := context.WithValue(r.Context(), key, data)
 	newRequest := r.WithContext(newContext)
 	*r = *newRequest
@@ -28,7 +28,7 @@ func PostDataToMap(r *http.Request, requiredFields ...string) (map[string]string
 	errorsMap := map[string]string{}
 	for _, v := range requiredFields {
 		if _, exists := data[v]; !exists {
-			errorsMap[v] = c.RequiredField
+			errorsMap[v] = src.RequiredField
 		}
 	}
 
