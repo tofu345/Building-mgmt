@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -41,7 +42,7 @@ func main() {
 	routes.RegisterRoutes(r)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins:   strings.Split(os.Getenv("ALLOWED_HOSTS"), ","),
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	})
