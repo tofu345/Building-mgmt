@@ -1,6 +1,7 @@
 <script lang="ts">
     import axios from "$lib/axios";
     import { setCookie } from "$lib/cookies";
+    import { user } from "$lib/stores/user";
 
     async function onSubmit(e: SubmitEvent) {
         const formData = new FormData(e.target as HTMLFormElement);
@@ -11,13 +12,13 @@
             data[key] = value;
         }
 
-        let res = await axios
+        const res = await axios
             .post("/token", data)
             .then((res) => res)
-            .catch((err) => err);
+            .catch((err) => err.response);
 
         if (res.status !== 200) {
-            console.error(res.data);
+            console.error(res);
             return;
         }
 
@@ -31,6 +32,8 @@
 
         console.log(res.data);
     }
+
+    console.log($user);
 </script>
 
 <form on:submit|preventDefault={onSubmit}>

@@ -1,13 +1,12 @@
+import { deleteCookie, getCookie, setCookie } from "$lib/cookies";
 import mem from "mem";
 import axios from "./index";
-import { deleteCookie, getCookie, setCookie } from "$lib/cookies";
 
 const refreshTokenFn = async () => {
     const refresh = getCookie("refresh");
-
     if (!refresh) {
         return null;
-    }    
+    }
 
     try {
         const res = await axios
@@ -15,12 +14,12 @@ const refreshTokenFn = async () => {
             .then((res) => res)
             .catch((err) => err);
 
-        if (!res?.data?.access) {
-            return null;
+        if (res.status != 200) {
+            deleteCookie("access");
+            deleteCookie("refresh");
         }
 
         setCookie("access", res.data.access, 7);
-        return res.data.access;
     } catch (error) {
         deleteCookie("access");
         deleteCookie("refresh");
