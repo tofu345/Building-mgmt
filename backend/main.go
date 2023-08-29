@@ -38,13 +38,11 @@ func main() {
 	port := "127.0.0.1:8000"
 	r := mux.NewRouter()
 	r.Use(middleware.Logging)
-
 	routes.RegisterRoutes(r)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   strings.Split(os.Getenv("ALLOWED_HOSTS"), ","),
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedOrigins: strings.Split(os.Getenv("ALLOWED_HOSTS"), ","),
+		AllowedHeaders: []string{"Authorization", "Content-Type"},
 	})
 
 	srv := &http.Server{

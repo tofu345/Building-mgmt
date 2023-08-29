@@ -38,11 +38,19 @@ func JsonResponse(w http.ResponseWriter, status int, data any) {
 }
 
 func Success(w http.ResponseWriter, data any) {
-	JsonResponse(w, http.StatusOK, data)
+	switch data := data.(type) {
+	case string:
+		JsonResponse(w, http.StatusOK, map[string]string{"message": data})
+	default:
+		JsonResponse(w, http.StatusOK, data)
+	}
 }
 
 func JsonError(w http.ResponseWriter, status int, err error) {
-	data := map[string]any{"message": "An error occured", "error": ParseError(err)}
+	data := map[string]any{
+		"message": "An error occured",
+		"error":   ParseError(err),
+	}
 	JsonResponse(w, status, data)
 }
 

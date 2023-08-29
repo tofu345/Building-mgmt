@@ -6,7 +6,7 @@ import (
 	s "github.com/tofu345/Building-mgmt-backend/src/services"
 )
 
-func AuthRequired(next http.Handler) http.Handler {
+func AuthenticationRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		user, err := s.JwtAuth(token)

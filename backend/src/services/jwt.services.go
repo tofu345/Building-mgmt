@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tofu345/Building-mgmt-backend/src"
 	m "github.com/tofu345/Building-mgmt-backend/src/models"
+	"gorm.io/gorm"
 )
 
 func JwtAuth(token string) (m.User, error) {
@@ -26,6 +28,9 @@ func JwtAuth(token string) (m.User, error) {
 	case string:
 		user, err := m.GetUserByEmail(email)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return m.User{}, src.ErrInvalidToken
+			}
 			return m.User{}, err
 		}
 

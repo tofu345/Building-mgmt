@@ -33,6 +33,8 @@ var (
 const (
 	JWT_ISSUER = "Building Management"
 
+	Success = "Success"
+
 	RequiredField = "This field is required"
 	InvalidData   = "Invalid data"
 	InvalidLogin  = "Incorrect email or password"

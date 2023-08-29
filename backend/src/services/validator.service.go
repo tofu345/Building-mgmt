@@ -3,25 +3,37 @@ package services
 import (
 	"log"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/tofu345/Building-mgmt-backend/src"
 )
 
 var v *validator.Validate
 
+var validators = []CustomValidator{
+	{"pswd", func(fl validator.FieldLevel) bool {
+		return len(fl.Field().String()) >= 6 && len(fl.Field().String()) <= 30
+	}},
+}
+
+type CustomValidator struct {
+	name string
+	f    func(validator.FieldLevel) bool
+}
+
 func init() {
 	v = validator.New()
-	err := v.RegisterValidation("pswd", func(fl validator.FieldLevel) bool {
-		return len(fl.Field().String()) >= 6 && len(fl.Field().String()) <= 30
-	})
-	if err != nil {
-		log.Fatal(err)
+
+	for _, obj := range validators {
+		err := v.RegisterValidation(obj.name, obj.f)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
-// func Validator() *validator.Validate {
-// 	return v
-// }
+func Validator() *validator.Validate {
+	return v
+}
 
 func ValidateModel(obj any) map[string]string {
 	err := v.Struct(obj)
@@ -29,10 +41,23 @@ func ValidateModel(obj any) map[string]string {
 		return nil
 	}
 
-	errMap := map[string]string{}
+	switch err := err.(type) {
+	case *validator.InvalidValidationError:
+		log.Println("! Invalid Validation Error", obj)
+		return nil
+	case validator.ValidationErrors:
+		return FormatValidationErrors(err)
+	default:
+		log.Printf("! Unknown validation error of type %T", obj)
+		return nil
+	}
+}
+
+func FormatValidationErrors(err validator.ValidationErrors) map[string]string {
+	errs := map[string]string{}
 	var errMsg string
 
-	for _, err := range err.(validator.ValidationErrors) {
+	for _, err := range err {
 		switch err.Tag() {
 		case "required":
 			errMsg = src.RequiredField
@@ -44,8 +69,8 @@ func ValidateModel(obj any) map[string]string {
 			errMsg = err.Tag()
 		}
 
-		errMap[err.Field()] = errMsg
+		errs[err.Field()] = errMsg
 	}
 
-	return errMap
+	return errs
 }

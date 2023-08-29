@@ -7,18 +7,18 @@ import (
 )
 
 type Location struct {
-	ID      uint   `gorm:"primarykey" json:"id"`
+	ID      uint   `json:"id" gorm:"primarykey"`
 	Name    string `json:"name" gorm:"unique" validate:"required"`
 	Address string `json:"address" gorm:"unique" validate:"required"`
-	AdminID uint   `json:"admin"`
-	Rooms   []Room `json:"rooms" gorm:"foreignKey:ID"`
+	// AdminID uint   `json:"admin"`
+	Rooms []Room `json:"rooms" gorm:"foreignKey:LocationID"`
 }
 
 func GetLocations() ([]Location, error) {
 	rows := []Location{}
 	err := db.Model(&Location{}).Preload("Rooms").First(&rows).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return []Location{}, err
+		return rows, nil
 	}
 
 	return rows, nil

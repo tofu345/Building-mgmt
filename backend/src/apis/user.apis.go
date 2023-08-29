@@ -9,11 +9,7 @@ import (
 )
 
 func GenerateTokenPair(w http.ResponseWriter, r *http.Request) {
-	data, valid := s.PostDataToMap(r, "email", "password")
-	if !valid {
-		s.BadRequest(w, data)
-		return
-	}
+	data := s.GetContextData(r, "validated_data").(map[string]string)
 
 	user, err := m.GetUserByEmail(data["email"])
 	if err != nil {
@@ -40,11 +36,7 @@ func GenerateTokenPair(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
-	data, valid := s.PostDataToMap(r, "token")
-	if !valid {
-		s.BadRequest(w, data)
-		return
-	}
+	data := s.GetContextData(r, "validated_data").(map[string]string)
 
 	payload, err := s.DecodeToken(data["token"])
 	if err != nil {
@@ -79,6 +71,12 @@ func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserList(w http.ResponseWriter, r *http.Request) {
+	user := s.GetContextData(r, "user").(m.User)
+	if !user.IsSuperuser {
+		s.JsonResponse(w, http.StatusUnauthorized, src.ErrUnauthorized)
+		return
+	}
+
 	users, err := m.GetUserList()
 	if err != nil {
 		s.BadRequest(w, err)
@@ -86,4 +84,9 @@ func GetUserList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Success(w, users)
+}
+
+func GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	user := s.GetContextData(r, "user").(m.User)
+	s.Success(w, user)
 }
