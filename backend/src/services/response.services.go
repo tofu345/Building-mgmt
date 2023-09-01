@@ -7,16 +7,19 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/tofu345/Building-mgmt-backend/src"
 	"gorm.io/gorm"
 )
 
-func ParseError(err error) string {
+func ParseError(err error) any {
 	var str string
 	switch err := err.(type) {
 	case *pgconn.PgError:
 		str = err.Detail
+	case validator.ValidationErrors:
+		return FmtValidationErrors(err)
 	default:
 		str = err.Error()
 

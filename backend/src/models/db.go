@@ -29,9 +29,11 @@ func init() {
 	username := os.Getenv("DB_USERNAME")
 	password := os.Getenv("DB_PASSWORD")
 	port := os.Getenv("DB_PORT")
+	timezone := os.Getenv("DB_TIMEZONE")
+	sslmode := os.Getenv("DB_SSLMODE")
 	dsn := fmt.Sprintf(
-		"host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Africa/Lagos",
-		host, username, password, dbname, port,
+		"host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v",
+		host, username, password, dbname, port, sslmode, timezone,
 	)
 
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -41,7 +43,3 @@ func init() {
 
 	db.AutoMigrate(models...)
 }
-
-// func GetDB() *gorm.DB {
-// 	return db
-// }

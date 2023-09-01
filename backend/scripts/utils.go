@@ -34,6 +34,10 @@ func getUserInput(prompt string) string {
 }
 
 func adminLogin() (m.User, error) {
+	if loggedInAdmin.ID != 0 {
+		return loggedInAdmin, nil
+	}
+
 	fmt.Println("! Admin Login Required")
 
 	email := getUserInput("> Admin Email: ")
@@ -58,6 +62,8 @@ func adminLogin() (m.User, error) {
 		fmt.Printf("! %v does not have admin permissions\n", admin.Name())
 		return adminLogin()
 	}
+
+	loggedInAdmin = admin
 
 	return admin, nil
 }
@@ -94,8 +100,19 @@ func getAndComparePasswords() string {
 	return password
 }
 
-func formatValidationErrors(errs map[string]string) {
+func printValidationErrors(errs map[string]string) {
+	longest := 0
+	for k := range errs {
+		if len(k) > longest {
+			longest = len(k)
+		}
+	}
+
 	for k, v := range errs {
-		fmt.Printf("! %v\t%v\n", k, v)
+		fmt.Printf("! %v", k)
+		if len(k) < longest {
+			fmt.Printf(strings.Repeat(" ", longest-len(k)))
+		}
+		fmt.Printf("\t%v\n", v)
 	}
 }

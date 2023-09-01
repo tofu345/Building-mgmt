@@ -18,6 +18,8 @@ type Script struct {
 }
 
 var (
+	loggedInAdmin m.User
+
 	r       = bufio.NewReader(os.Stdin)
 	scripts = []Script{
 		{"create_admin", "Create Admin User", createAdmin},
@@ -104,19 +106,22 @@ func createAdmin() {
 		IsSuperuser: true,
 	}
 
-	errs := s.ValidateModel(user)
-	if errs != nil {
-		formatValidationErrors(errs)
-		_, ok := errs["Password"]
-		if len(errs) == 1 && ok {
-			proceed := getUserInput("> Save anyway? (y/n): ")
-			if proceed != "y" {
-				return
-			}
-		} else {
+	err = s.ValidateModel(user)
+	if err != nil {
+		errMap := s.FmtValidationErrors(err)
+		printValidationErrors(errMap)
+
+		_, exists := errMap["Password"]
+		if !(len(errMap) == 1 && exists) {
+			createAdmin()
 			return
 		}
 
+		proceed := getUserInput("> Save anyway? (y/n): ")
+		if proceed != "y" {
+			createAdmin()
+			return
+		}
 	}
 
 	user.Password, err = s.HashPassword(user.Password)

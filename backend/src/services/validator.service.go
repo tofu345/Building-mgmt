@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/go-playground/validator/v10"
@@ -10,9 +11,11 @@ import (
 var v *validator.Validate
 
 var validators = []CustomValidator{
-	{"pswd", func(fl validator.FieldLevel) bool {
-		return len(fl.Field().String()) >= 6 && len(fl.Field().String()) <= 30
-	}},
+	{
+		"pswd", func(fl validator.FieldLevel) bool {
+			return len(fl.Field().String()) >= 6 && len(fl.Field().String()) <= 30
+		},
+	},
 }
 
 type CustomValidator struct {
@@ -31,33 +34,25 @@ func init() {
 	}
 }
 
-func Validator() *validator.Validate {
-	return v
+func ValidateModel(obj any) error {
+	return v.Struct(obj)
 }
 
-func ValidateModel(obj any) map[string]string {
-	err := v.Struct(obj)
-	if err == nil {
-		return nil
-	}
+func ValidateMap(data map[string]any, schema map[string]any) map[string]any {
+	return v.ValidateMap(data, schema)
+}
 
-	switch err := err.(type) {
+func FmtValidationErrors(err error) map[string]string {
+	switch err.(type) {
 	case *validator.InvalidValidationError:
-		log.Println("! Invalid Validation Error", obj)
-		return nil
-	case validator.ValidationErrors:
-		return FormatValidationErrors(err)
-	default:
-		log.Printf("! Unknown validation error of type %T", obj)
-		return nil
+		fmt.Printf("! validator.InvalidValidationError")
+		return map[string]string{"message": err.Error()}
 	}
-}
 
-func FormatValidationErrors(err validator.ValidationErrors) map[string]string {
 	errs := map[string]string{}
 	var errMsg string
 
-	for _, err := range err {
+	for _, err := range err.(validator.ValidationErrors) {
 		switch err.Tag() {
 		case "required":
 			errMsg = src.RequiredField
