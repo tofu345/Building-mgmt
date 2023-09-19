@@ -3,7 +3,7 @@ package apis
 import (
 	"net/http"
 
-	"github.com/tofu345/Building-mgmt-backend/src"
+	"github.com/tofu345/Building-mgmt-backend/src/constants"
 	m "github.com/tofu345/Building-mgmt-backend/src/models"
 	s "github.com/tofu345/Building-mgmt-backend/src/services"
 )
@@ -18,18 +18,18 @@ func GenerateTokenPair(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !s.CheckPasswordHash(data["password"], user.Password) {
-		s.BadRequest(w, src.InvalidLogin)
+		s.BadRequest(w, constants.InvalidLogin)
 		return
 	}
 
 	access, err := s.AccessToken(user)
 	if err != nil {
-		s.BadRequest(w, src.TokenError)
+		s.BadRequest(w, constants.TokenError)
 	}
 
 	refresh, err := s.RefreshToken(user)
 	if err != nil {
-		s.BadRequest(w, src.TokenError)
+		s.BadRequest(w, constants.TokenError)
 	}
 
 	s.Success(w, map[string]any{"access": access, "refresh": refresh})
@@ -45,7 +45,7 @@ func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, exists := payload["ref"]; !exists {
-		s.BadRequest(w, src.InvalidToken)
+		s.BadRequest(w, constants.InvalidToken)
 		return
 	}
 
@@ -60,20 +60,20 @@ func RegenerateAccessToken(w http.ResponseWriter, r *http.Request) {
 
 		access, err := s.AccessToken(user)
 		if err != nil {
-			s.BadRequest(w, src.TokenError)
+			s.BadRequest(w, constants.TokenError)
 			return
 		}
 
 		s.Success(w, map[string]any{"access": access})
 	default:
-		s.BadRequest(w, src.InvalidToken)
+		s.BadRequest(w, constants.InvalidToken)
 	}
 }
 
 func GetUserList(w http.ResponseWriter, r *http.Request) {
 	user := s.GetContextData(r, "user").(m.User)
 	if !user.IsSuperuser {
-		s.JsonResponse(w, http.StatusUnauthorized, src.ErrUnauthorized)
+		s.JsonResponse(w, http.StatusUnauthorized, constants.ErrUnauthorized)
 		return
 	}
 

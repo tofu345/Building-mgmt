@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/tofu345/Building-mgmt-backend/src"
+	"github.com/tofu345/Building-mgmt-backend/src/constants"
 )
 
 var v *validator.Validate
@@ -67,7 +67,7 @@ func FmtValidationErrors(errs error) map[string]string {
 func _fmtValidationError(err validator.FieldError) (key string, value string) {
 	switch err.Tag() {
 	case "required":
-		value = src.RequiredField
+		value = constants.RequiredField
 	case "email":
 		value = "Invalid email address"
 	case "pswd":

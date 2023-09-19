@@ -9,8 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/tofu345/Building-mgmt-backend/src"
-	"gorm.io/gorm"
+	"github.com/tofu345/Building-mgmt-backend/src/constants"
 )
 
 func ParseError(err error) any {
@@ -24,8 +23,6 @@ func ParseError(err error) any {
 		str = err.Error()
 
 		switch {
-		case errors.Is(err, gorm.ErrRecordNotFound):
-			str = "Object not found"
 		case strings.HasPrefix(str, "UNIQUE constraint failed: "):
 			str = strings.Split(str, ": ")[1] + " is already in use"
 		}
@@ -51,14 +48,14 @@ func Success(w http.ResponseWriter, data any) {
 
 func JsonError(w http.ResponseWriter, status int, err error) {
 	data := map[string]any{
-		"message": "An error occured",
+		"message": constants.ErrorMessage,
 		"error":   ParseError(err),
 	}
 	JsonResponse(w, status, data)
 }
 
 func BadRequest(w http.ResponseWriter, err any) {
-	data := map[string]any{"message": "An error occured"}
+	data := map[string]any{"message": constants.ErrorMessage}
 
 	switch err := err.(type) {
 	case error:
@@ -75,7 +72,7 @@ func BadRequest(w http.ResponseWriter, err any) {
 func JsonDecode(r *http.Request, data any) error {
 	err := json.NewDecoder(r.Body).Decode(data)
 	if errors.Is(err, io.EOF) {
-		return src.ErrEmptyPostData
+		return constants.ErrEmptyPostData
 	}
 	return err
 }

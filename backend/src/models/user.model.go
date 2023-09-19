@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/tofu345/Building-mgmt-backend/src"
+	"github.com/tofu345/Building-mgmt-backend/src/constants"
 	"gorm.io/gorm"
 )
 
@@ -16,8 +16,8 @@ type User struct {
 	LastName    string    `json:"last_name" validate:"required"`
 	IsSuperuser bool      `json:"is_superuser"`
 	OwnedRooms  []Room    `json:"owned_rooms" gorm:"foreignKey:OwnerID"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"-"`
+	UpdatedAt   time.Time `json:"-"`
 }
 
 func (user *User) Name() string {
@@ -28,7 +28,7 @@ func GetUserByEmail(email string) (User, error) {
 	var user User
 	err := db.Model(&User{}).Preload("OwnedRooms").First(&user, "email = ?", email).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, src.ErrUserNotFound
+		return user, constants.ErrUserNotFound
 	}
 	return user, err
 }

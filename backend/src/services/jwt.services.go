@@ -7,20 +7,20 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/tofu345/Building-mgmt-backend/src"
+	"github.com/tofu345/Building-mgmt-backend/src/constants"
 	m "github.com/tofu345/Building-mgmt-backend/src/models"
 	"gorm.io/gorm"
 )
 
 func JwtAuth(token string) (m.User, error) {
 	if token == "" {
-		return m.User{}, src.ErrInvalidToken
+		return m.User{}, constants.ErrInvalidToken
 	}
 
 	token = strings.Split(token, " ")[1]
 	payload, err := DecodeToken(token)
 	if err != nil {
-		return m.User{}, src.ErrInvalidToken
+		return m.User{}, constants.ErrInvalidToken
 	}
 
 	email := payload["email"]
@@ -29,21 +29,21 @@ func JwtAuth(token string) (m.User, error) {
 		user, err := m.GetUserByEmail(email)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return m.User{}, src.ErrInvalidToken
+				return m.User{}, constants.ErrInvalidToken
 			}
 			return m.User{}, err
 		}
 
 		return user, nil
 	default:
-		return m.User{}, src.ErrInvalidToken
+		return m.User{}, constants.ErrInvalidToken
 	}
 }
 
 func defaultJwtClaims(user m.User) jwt.MapClaims {
 	time_now := time.Now()
 	return jwt.MapClaims{
-		"iss":   src.JWT_ISSUER,
+		"iss":   constants.JWT_ISSUER,
 		"iat":   time_now.Unix(),
 		"exp":   time_now.Add(time.Hour).Unix(),
 		"email": user.Email,
@@ -51,13 +51,13 @@ func defaultJwtClaims(user m.User) jwt.MapClaims {
 }
 
 func AccessToken(user m.User) (string, error) {
-	key := []byte(src.JWT_KEY)
+	key := []byte(constants.JWT_KEY)
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, defaultJwtClaims(user))
 	return t.SignedString(key)
 }
 
 func RefreshToken(user m.User) (string, error) {
-	key := []byte(src.JWT_KEY)
+	key := []byte(constants.JWT_KEY)
 	claims := defaultJwtClaims(user)
 	claims["ref"] = true
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -70,7 +70,7 @@ func DecodeToken(tokenData string) (map[string]any, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(src.JWT_KEY), nil
+		return []byte(constants.JWT_KEY), nil
 	})
 	if err != nil {
 		return map[string]any{}, err
