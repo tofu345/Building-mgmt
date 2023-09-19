@@ -64,9 +64,7 @@ func BadRequest(w http.ResponseWriter, err any) {
 	case error:
 		data["detail"] = ParseError(err)
 	case map[string]any:
-		for k, v := range err {
-			data[k] = v
-		}
+		data["errors"] = err
 	default:
 		data["detail"] = err
 	}

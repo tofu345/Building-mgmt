@@ -14,9 +14,9 @@ func ValidateSchema(schema map[string]any, next Handler) Handler {
 		data := map[string]any{}
 		s.JsonDecode(r, &data)
 
-		err := s.ValidateMap(data, schema)
-		if err != nil {
-			s.BadRequest(w, err)
+		errs := s.ValidateMap(data, schema)
+		if len(errs) > 0 {
+			s.BadRequest(w, errs)
 			return
 		}
 

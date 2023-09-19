@@ -28,6 +28,7 @@ var (
 	ErrEmptyPostData  = errors.New("Empty post data")
 	ErrObjectNotFound = errors.New("Object not found")
 	ErrUnauthorized   = errors.New("Unauthorized")
+	ErrUserNotFound   = errors.New("User not found")
 )
 
 const (

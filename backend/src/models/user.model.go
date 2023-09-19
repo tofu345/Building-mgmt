@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/tofu345/Building-mgmt-backend/src"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +27,9 @@ func (user *User) Name() string {
 func GetUserByEmail(email string) (User, error) {
 	var user User
 	err := db.Model(&User{}).Preload("OwnedRooms").First(&user, "email = ?", email).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return user, src.ErrUserNotFound
+	}
 	return user, err
 }
 
