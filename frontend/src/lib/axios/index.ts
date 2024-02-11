@@ -23,24 +23,25 @@ instance.interceptors.request.use(
 );
 
 // Try refresh token
-instance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const config = error?.config;
-        const url = config.url;
+// instance.interceptors.response.use(
+//     (response) => response,
+//     async (error) => {
+//         const config = error?.config;
+//         const url = config.url;
 
-        if (error?.response?.status !== 200) {
-            const access = await memoizedRefreshToken();
-            if (access) {
-                config.headers["Authorization"] = `Bearer ${access}`;
-            }
+//         if (error?.response?.status !== 200) {
+//             const access = await memoizedRefreshToken();
+//             if (access) {
+//                 config.headers["Authorization"] = `Bearer ${access}`;
+//             }
 
-            return axios(config);
-        }
-        // TODO: Redirect to login
+//             return axios(config);
+//         }
+//         // TODO: Redirect to login
 
-        return Promise.reject(error);
-    }
-);
+//         return Promise.reject(error);
+//     }
+// );
 
 export default instance;
+
