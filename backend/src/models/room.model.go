@@ -3,12 +3,12 @@ package models
 import "time"
 
 type Room struct {
-	ID             uint      `json:"id" gorm:"primarykey"`
-	Name           string    `json:"name" validate:"required"`
-	OwnerID        uint      `json:"owner_id" validate:"required"`
-	LocationID     uint      `json:"-" validate:"required"`
-	TenantID       *uint     `json:"tenant_id" validate:"-"`
-	Tenant         User      `json:"tenant" validate:"-" gorm:"foreignKey:TenantID"`
+	ID         uint   `json:"id" gorm:"primarykey"`
+	Name       string `json:"name" validate:"required"`
+	OwnerID    uint   `json:"owner_id" validate:"required"`
+	LocationID uint   `json:"-" validate:"required"`
+	// TenantID       *uint     `json:"tenant_id" validate:"-"`
+	// Tenant         User      `json:"tenant" validate:"-" gorm:"foreignKey:TenantID"`
 	TenancyEndDate time.Time `json:"tenancy_end_date" gorm:"autoCreateTime:false"`
 }
 

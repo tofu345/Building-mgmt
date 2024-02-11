@@ -158,3 +158,4 @@ func CreateRoomForLocation(w http.ResponseWriter, r *http.Request) {
 
 	s.Success(w, room)
 }
+

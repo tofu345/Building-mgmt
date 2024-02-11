@@ -47,11 +47,8 @@ func GetAdmins() ([]User, error) {
 
 func GetUserList() ([]User, error) {
 	var users []User
-	err := db.Model(&User{}).Preload("OwnedRooms").First(&users).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return users, nil
-	}
-	return users, err
+	model := db.Model(&User{}).Preload("OwnedRooms").First(&users)
+	return users, model.Error
 }
 
 func CreateUser(user *User) error {

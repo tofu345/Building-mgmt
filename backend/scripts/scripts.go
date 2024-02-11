@@ -112,13 +112,13 @@ func createAdmin() {
 		printValidationErrors(errMap)
 
 		_, exists := errMap["Password"]
-		if !(len(errMap) == 1 && exists) {
-			createAdmin()
-			return
-		}
-
-		proceed := getUserInput("> Save anyway? (y/n): ")
-		if proceed != "y" {
+		if len(errMap) == 1 && exists {
+			proceed := getUserInput("> Save anyway? (y/n): ")
+			if proceed != "y" {
+				createAdmin()
+				return
+			}
+		} else {
 			createAdmin()
 			return
 		}

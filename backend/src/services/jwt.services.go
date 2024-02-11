@@ -17,8 +17,12 @@ func JwtAuth(token string) (m.User, error) {
 		return m.User{}, constants.ErrInvalidToken
 	}
 
-	token = strings.Split(token, " ")[1]
-	payload, err := DecodeToken(token)
+	tokens := strings.Split(token, " ")
+	if len(tokens) != 2 {
+		return m.User{}, constants.ErrInvalidToken
+	}
+
+	payload, err := DecodeToken(tokens[1])
 	if err != nil {
 		return m.User{}, constants.ErrInvalidToken
 	}

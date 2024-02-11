@@ -71,7 +71,7 @@ func _fmtValidationError(err validator.FieldError) (key string, value string) {
 	case "email":
 		value = "Invalid email address"
 	case "pswd":
-		value = "Password must be at 6-30 characters"
+		value = "Password must be between 6-30 characters"
 	default:
 		value = err.Tag()
 	}
